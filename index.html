@@ -838,76 +838,100 @@ function renderFAQ() {
            CAROUSEL — desde carouselData
         ══════════════════════════════════════════════════════════ */
    var carouselData = [
-    { img: 'ban/1.jpg', label: ' ' },
+   
     { img: 'ban/2.jpg', label: ' ' },
     { img: 'ban/3.jpg', label: ' ' },
-    { img: 'ban/4.jpg', label: ' ' }
+  
 ];
 
-        (function () {
-            var track = document.getElementById('carouselTrack');
-            var dotsEl = document.getElementById('carouselDots');
-            var prev = document.getElementById('carouselPrev');
-            var next = document.getElementById('carouselNext');
-            var cur = 0, timer = null;
+   /* ══════════════════════════════════════════════════════════
+   CAROUSEL — Una imagen por slide
+══════════════════════════════════════════════════════════ */
+(function () {
+    var track = document.getElementById('carouselTrack');
+    var dotsEl = document.getElementById('carouselDots');
+    var prev = document.getElementById('carouselPrev');
+    var next = document.getElementById('carouselNext');
+    var cur = 0, timer = null;
 
-     carouselData.forEach(function (item, i) {
-    var slide = document.createElement('div');
-    slide.className = 'carousel-slide';
+    // Limpiar track por si acaso hay contenido previo
+    track.innerHTML = '';
+    dotsEl.innerHTML = '';
 
-    // Contenedor de la imagen
-    var imgWrapper = document.createElement('div');
-    imgWrapper.className = 'carousel-slide-placeholder'; 
-    // Mantenemos la clase para heredar el tamaño del contenedor original
-    
-    var img = document.createElement('img');
-    img.src = item.img;
-    img.alt = item.label;
-    
-    // Estilos para que la imagen se ajuste y recorte (Object Fit)
-    img.style.width = '100%';
-    img.style.height = '100%';
-    img.style.objectFit = 'cover'; // Esto hace el "recorte" automático
-    img.style.display = 'block';
+    carouselData.forEach(function (item, i) {
+        // 1. Creamos el contenedor del slide (Este ocupa el 100% del track)
+        var slide = document.createElement('div');
+        slide.className = 'carousel-slide';
+        slide.style.flex = '0 0 100%'; // Forzamos que cada uno ocupe todo el ancho
+        slide.style.width = '100%';
 
-    imgWrapper.appendChild(img);
+        // 2. Creamos el wrapper de la imagen
+        var imgWrapper = document.createElement('div');
+        imgWrapper.className = 'carousel-slide-placeholder';
+        imgWrapper.style.width = '100%';
+        imgWrapper.style.height = '100%';
 
-    var lbl = document.createElement('div');
-    lbl.className = 'carousel-slide-label'; 
-    lbl.textContent = item.label;
+        // 3. Creamos la imagen con object-fit para que no se deforme
+        var img = document.createElement('img');
+        img.src = item.img;
+        img.alt = item.label || 'Slide ' + i;
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'cover'; 
+        img.style.display = 'block';
 
-    slide.appendChild(imgWrapper);
-    slide.appendChild(lbl);
-    track.appendChild(slide);
+        imgWrapper.appendChild(img);
+        slide.appendChild(imgWrapper);
 
-    // Botones de navegación (Dots) - Esto se mantiene igual
-    var dot = document.createElement('button');
-    dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
-    dot.setAttribute('aria-label', 'Slide ' + (i + 1));
-    dot.addEventListener('click', function () { goTo(i); });
-    dotsEl.appendChild(dot);
-});
-            function goTo(idx) {
-                cur = (idx + carouselData.length) % carouselData.length;
-                track.style.transform = 'translateX(-' + (cur * 100) + '%)';
-                dotsEl.querySelectorAll('.carousel-dot').forEach(function (d, i) { d.classList.toggle('active', i === cur); });
-                clearInterval(timer);
-                timer = setInterval(function () { goTo(cur + 1); }, 4200);
-            }
+        // Agregamos el label si existe
+        if (item.label && item.label.trim() !== '') {
+            var lbl = document.createElement('div');
+            lbl.className = 'carousel-slide-label';
+            lbl.textContent = item.label;
+            slide.appendChild(lbl);
+        }
 
-            prev.addEventListener('click', function () { goTo(cur - 1); });
-            next.addEventListener('click', function () { goTo(cur + 1); });
+        track.appendChild(slide);
 
-            var tx = 0;
-            track.addEventListener('touchstart', function (e) { tx = e.touches[0].clientX; }, { passive: true });
-            track.addEventListener('touchend', function (e) {
-                var d = tx - e.changedTouches[0].clientX;
-                if (Math.abs(d) > 38) goTo(d > 0 ? cur + 1 : cur - 1);
-            });
-            goTo(0);
-        })();
+        // 4. Botones de navegación (Dots)
+        var dot = document.createElement('button');
+        dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+        dot.setAttribute('aria-label', 'Slide ' + (i + 1));
+        dot.addEventListener('click', function () { goTo(i); });
+        dotsEl.appendChild(dot);
+    });
 
-        /* ══════════════════════════════════════════════════════════
+    function goTo(idx) {
+        cur = (idx + carouselData.length) % carouselData.length;
+        // El desplazamiento ahora moverá el track exactamente un slide por vez
+        track.style.transform = 'translateX(-' + (cur * 100) + '%)';
+        
+        // Actualizar dots
+        var dots = dotsEl.querySelectorAll('.carousel-dot');
+        dots.forEach(function (d, i) { 
+            d.classList.toggle('active', i === cur); 
+        });
+
+        // Reiniciar el temporizador de auto-play
+        clearInterval(timer);
+        timer = setInterval(function () { goTo(cur + 1); }, 4200);
+    }
+
+    // Eventos de botones
+    if (prev) prev.addEventListener('click', function () { goTo(cur - 1); });
+    if (next) next.addEventListener('click', function () { goTo(cur + 1); });
+
+    // Soporte para Swipe (Táctil)
+    var tx = 0;
+    track.addEventListener('touchstart', function (e) { tx = e.touches[0].clientX; }, { passive: true });
+    track.addEventListener('touchend', function (e) {
+        var d = tx - e.changedTouches[0].clientX;
+        if (Math.abs(d) > 50) goTo(d > 0 ? cur + 1 : cur - 1);
+    });
+
+    // Iniciar auto-play
+    timer = setInterval(function () { goTo(cur + 1); }, 4200);
+})(); /* ══════════════════════════════════════════════════════════
            NAV — scroll shadow + hamburger + active link
         ══════════════════════════════════════════════════════════ */
         (function () {
