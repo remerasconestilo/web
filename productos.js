@@ -110,7 +110,7 @@ var DATA_PRODUCTS = [
     ],
     "sizes": ["S", "M", "L", "XL", "XXL"],
     "agotado": [],
-    "price": 33000, // Ajustado igual al Canguro/Croptop según lógica de precios
+    "price": 30000, // Ajustado igual al Canguro/Croptop según lógica de precios
     "priceOld": null
   }
 ];
