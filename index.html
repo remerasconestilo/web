@@ -719,31 +719,32 @@
             });
         }
 
-        /* Construye el mensaje de WhatsApp con todos los ítems del carrito */
-        function buildWAMessage() {
-            var lines = [];
-            lines.push(TEXTS.cart.waHeader);
-            lines.push('');
-            lines.push(TEXTS.cart.waTitle);
-            lines.push('');
+     /* Construye el mensaje de WhatsApp optimizado */
+function buildWAMessage() {
+    var lines = [];
+    lines.push("🛍️ *NUEVO PEDIDO - REMERAS CON ESTILO*");
+    lines.push("------------------------------------------");
+    lines.push("");
 
-            cart.forEach(function (item, idx) {
-                lines.push((idx + 1) + '. *' + item.product.name + '*');
-                lines.push('   • ' + TEXTS.cart.waTalle + ': ' + item.size);
-                lines.push('   • ' + TEXTS.cart.waColor + ': ' + item.colorName);
-                lines.push('   • ' + TEXTS.cart.waCant + ': ' + item.qty);
-                lines.push('   • ' + TEXTS.cart.waSubtotal + ': ' + fmt(item.product.price * item.qty));
-                lines.push('');
-            });
+    cart.forEach(function (item, idx) {
+        lines.push("Item #" + (idx + 1) + ": *" + item.product.name.toUpperCase() + "*");
+        lines.push("📏 " + TEXTS.cart.waTalle + ": " + item.size);
+        lines.push("🎨 " + TEXTS.cart.waColor + ": " + item.colorName);
+        lines.push("🔢 " + TEXTS.cart.waCant + ": " + item.qty);
+        lines.push("💰 " + TEXTS.cart.waSubtotal + ": *" + fmt(item.product.price * item.qty) + "*");
+        lines.push("------------------------------------------");
+    });
 
-            var total = cart.reduce(function (s, i) { return s + i.product.price * i.qty; }, 0);
-            lines.push('💰 *Total: ' + fmt(total) + '*');
-            lines.push('');
-            lines.push(TEXTS.cart.waThanks);
+    var total = cart.reduce(function (s, i) { return s + i.product.price * i.qty; }, 0);
+    lines.push("");
+    lines.push("✅ *TOTAL A PAGAR: " + fmt(total) + "*");
+    lines.push("");
+    lines.push("💬 _Quedo a la espera de la confirmación para coordinar el pago y envío._");
+    lines.push("");
+    lines.push(TEXTS.cart.waThanks);
 
-            return lines.join('\n');
-        }
-
+    return lines.join('\n');
+}
         function openCart() {
             document.getElementById('cartOverlay').classList.add('open');
             document.body.style.overflow = 'hidden';
